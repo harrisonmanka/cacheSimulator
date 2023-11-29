@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+
 public class Cache {
 
     private int numSets;
@@ -17,6 +21,15 @@ public class Cache {
     }
 
     public void readFile(String file){
-
+        try{
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+            while(line = reader.readLine() != null){
+                String[] inputArr = line.split(":");
+            }
+        }
+        catch(FileNotFoundException e){
+            System.out.println("File not found. Try again with a valid file.");
+        }
     }
 }
