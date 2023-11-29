@@ -12,7 +12,7 @@ public class Cache {
     private int hits;
     private int misses;
     private int accesses;
-    private ArrayList<String> results;
+    private ArrayList<Entry> results;
 
     public Cache(){
         this.numSets = 0;
@@ -33,12 +33,15 @@ public class Cache {
                 String[] inputArr = line.split(":");
                 if(index == 0){
                     this.numSets = Integer.parseInt(inputArr[inputArr.length-1]);
+                    //todo: numsets less then 8k and power of 2
                 }
                 else if(index == 1){
                     this.setSize = Integer.parseInt(inputArr[inputArr.length-1]);
+                    //todo: set size <=8 
                 }
                 else if(index == 2){
                     this.lineSize = Integer.parseInt(inputArr[inputArr.length-1]);
+                    //todo: linesize >= 4 and power of 2
                 }
                 else{
                     String instruction = inputArr[0];
@@ -73,14 +76,21 @@ public class Cache {
             this.tag = tag;
             this.index = index;
             this.offset = offset;
-            this.result = result;
-            this.memrefs = memrefs;
+            this.result = null;
+            this.memrefs = 0;
         }
 
         public String toString(){
             String result ="";
             return result;
         }
-        
+
+        public void setResult(String newResult){
+            this.result = newResult;
+        }
+
+        public void setMemRef(int newMemRef){
+            this.memrefs = newMemRef;
+        }
     }
 }
