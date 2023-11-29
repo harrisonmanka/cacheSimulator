@@ -24,8 +24,13 @@ public class Cache {
         try{
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
-            while(line = reader.readLine() != null){
+            while((line = reader.readLine()) != null){
                 String[] inputArr = line.split(":");
+                // for(String s : inputArr){
+                //     System.out.print(s + " ");
+                // }
+                // System.out.println();
+                if()
             }
         }
         catch(FileNotFoundException e){
