@@ -56,7 +56,7 @@ public class Cache {
 
                     }
                     case "write" -> {
-                        k
+
                     }
                 }
             }
