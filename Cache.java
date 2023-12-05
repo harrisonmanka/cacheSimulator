@@ -1,96 +1,106 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
 
 public class Cache {
 
-    private int numSets;
-    private int setSize;
-    private int lineSize;
     private int hits;
-    private int misses;
-    private int accesses;
-    private ArrayList<Entry> results;
+    private int miss;
+    private Set<Block> set;
+    int count;
 
-    public Cache(){
-        this.numSets = 0;
-        this.setSize = 0;
-        this.lineSize = 0;
-        this.hits = 0;
-        this.misses = 0;
-        this.accesses = 0;
-        this.results = new ArrayList<>();
+    public Cache(String file) throws FileNotFoundException {
+        this.set = new HashSet<Block>();
+        this.count = 0;
+        read(file);
     }
 
-    public void readFile(String file){
-        try{
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            int index = 0;
-            while((line = reader.readLine()) != null){
-                String[] inputArr = line.split(":");
-                if(index == 0){
-                    this.numSets = Integer.parseInt(inputArr[inputArr.length-1]);
-                    //todo: numsets less then 8k and power of 2
+    private void read(String file) throws FileNotFoundException {
+        File fileObj = new File(file);
+        Scanner sc = new Scanner(fileObj);
+
+        int sets = sc.useDelimiter("[^\\d]+").nextInt();
+        int setSize = sc.useDelimiter("[^\\d]+").nextInt();
+        int lines = sc.useDelimiter("[^\\d]+").nextInt();
+
+        sc.nextLine();
+
+        while (sc.hasNext()) {
+            String[] line = sc.nextLine().split(":");
+            String cmd = line[0];
+            int size = Integer.parseInt(line[1]);
+            int address = Integer.parseInt(line[2], 16);
+            System.out.println(cmd + " " + size + " " + address);
+
+            int offsetSize = findOffsetSize(lines);
+            int indexSize = findIndexSize(sets);
+            int tagSize = lines - offsetSize - indexSize;
+
+            int tag = findTag(address, tagSize, lines);
+            int offset = findOffset(address, offsetSize);
+            int index = findIndex(address, indexSize, offsetSize);
+
+            System.out.println("tag is: " + tag);
+            System.out.println("index is: " + index);
+            System.out.println("offset is: " + offset);
+            System.out.println();
+
+            if(address % size == 0){
+                Block block = new Block(false, tag, index, offset, count);
+                set.add(block);
+                count++;
+                switch(cmd){
+                    case "read" -> { //if in set --> hit, if not --> miss and memRef+1
+
+                    }
+                    case "write" -> {
+                        k
+                    }
                 }
-                else if(index == 1){
-                    this.setSize = Integer.parseInt(inputArr[inputArr.length-1]);
-                    //todo: set size <=8 
-                }
-                else if(index == 2){
-                    this.lineSize = Integer.parseInt(inputArr[inputArr.length-1]);
-                    //todo: linesize >= 4 and power of 2
-                }
-                else{
-                    String instruction = inputArr[0];
-                    int size = Integer.parseInt(inputArr[1]);
-                    int address = Integer.parseInt(inputArr[2]);
-                    simulate(instruction, size, address);
-                }
-                index++;
+            }
+            else{
+                System.out.println("Misalignment in the data.");
+                System.exit(1);
             }
         }
-        catch(IOException e){
-            System.out.println("File not found. Try again with a valid file.");
-        }
     }
 
-    public void simulate(String instruction, int size, int address){
-        
+    public int findOffsetSize(int lines){
+        return (int) (Math.log(lines) / Math.log(2));
     }
 
-    private class Entry {
-        String access;
-        int address;
-        int tag;
-        int index;
-        int offset;
-        String result;
-        int memrefs;
-        
-        public Entry(String access, int address, int tag, int index, int offset, String result, int memrefs){
-            this.access = access;
-            this.address = address;
+    public int findIndexSize(int sets){
+        return (int) (Math.log(sets) / Math.log(2));
+    }
+
+    public int findTag(int address, int tagSize, int lines){
+        return (((1 << tagSize) - 1) & (address >> (lines - tagSize)));
+    }
+
+    public int findOffset(int address, int offsetSize){
+        return (((1 << offsetSize) - 1) & address);
+    }
+
+    public int findIndex(int address, int indexSize, int offsetSize){
+        return (((1 << indexSize) - 1) & (address >>  offsetSize));
+    }
+
+    public class Block{
+
+        private boolean isDirty;
+        private int tag;
+        private int index;
+        private int offset;
+        private int timeStamp;
+
+        public Block(boolean dirty, int tag, int index, int offset, int timeStamp){
+            this.isDirty = dirty;
             this.tag = tag;
             this.index = index;
             this.offset = offset;
-            this.result = null;
-            this.memrefs = 0;
-        }
-
-        public String toString(){
-            String result ="";
-            return result;
-        }
-
-        public void setResult(String newResult){
-            this.result = newResult;
-        }
-
-        public void setMemRef(int newMemRef){
-            this.memrefs = newMemRef;
+            this.timeStamp = timeStamp;
         }
     }
 }
