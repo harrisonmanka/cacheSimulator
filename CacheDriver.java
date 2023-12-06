@@ -16,7 +16,7 @@ public class CacheDriver {
             System.exit(1);
         }
         else{
-            Cache cache = new Cache(args[0]);
+            Cache cache = new Cache();
             cache.read(args[0]);
         }
     }
