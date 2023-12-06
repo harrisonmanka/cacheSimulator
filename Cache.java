@@ -27,6 +27,7 @@ public class Cache {
         int setSize = sc.useDelimiter("[^\\d]+").nextInt();
         int lines = sc.useDelimiter("[^\\d]+").nextInt();
 
+        errorHandle(sets,setSize,lines);
         sc.nextLine();
 
         printHeader();
@@ -99,6 +100,34 @@ public class Cache {
         }
 
         printSummary();
+    }
+    /**
+     * Method for the error handle conditions in the handout
+     * @param sets the number of sets
+     * @param setSize the size of each set
+     * @param lineSize the number of lines each set has
+     */
+    public void errorHandle(int sets, int setSize, int lineSize){
+        if(sets > 8000){
+            System.out.println("The number of sets has exceed 8k");
+            System.exit(1);
+        }
+        if (setSize > 8) {
+            System.out.println("The size of the set has exceed 8 elements");
+            System.exit(1);
+        }
+        if (lineSize < 4){
+            System.out.println("The size of the line is not large enough");
+            System.exit(1);
+        }
+        if ((sets % 2) != 0) {
+            System.out.println("The number of sets is not a power of 2");
+            System.exit(1);
+        }
+        if ((lineSize % 2) != 0){
+            System.out.println("The line size is not a power of 2");
+            System.exit(1);
+        }
     }
 
     public boolean hasDirtyBit(){
