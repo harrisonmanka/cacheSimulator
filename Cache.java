@@ -55,6 +55,7 @@ public class Cache {
             if(address % size == 0){
                 Block block = new Block(false, tag, index, offset, count);
                 count++;
+                boolean sizeCheck = alreadyHit.size() == setSize;
                 switch(cmd){
                     case "read" -> {
                         boolean check = hasBlock(block);
@@ -64,6 +65,15 @@ public class Cache {
                             alreadyHit.add(block);
                             hits++;
                         }
+                        else if(sizeCheck){
+                            if(check) {
+                                output(cmd, line[2], tag, index, offset, "miss", 1);
+                            }
+                            else{
+                                output(cmd, line[2], tag, index, offset, "miss", 2);
+                            }
+                            miss++;
+                        }
                         else{ //if not --> miss and memRef+1
                             output(cmd, line[2], tag, index, offset, "miss", 1);
                             miss++;
@@ -71,7 +81,22 @@ public class Cache {
                         set.add(block);
                     }
                     case "write" -> {
+                        boolean check = hasBlock(block);
+                        if(check && !sizeCheck){ //if in set --> hit
+                            output(cmd, line[2], tag, index, offset, "hit", 0);
+                            alreadyHit.add(block);
+                            hits++;
+                        }
+                        else if(sizeCheck){ //replace w/ LRU aka memRef == 2, because cache is full
+                            block.isDirty = true;
+                            output(cmd, line[2], tag, index, offset, "miss", 2);
+                            miss++;
 
+                        }
+                        else{ //if not --> miss and memRef+1
+                            output(cmd, line[2], tag, index, offset, "miss", 1);
+                            miss++;
+                        }
                     }
                 }
             }
