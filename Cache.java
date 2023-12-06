@@ -1,6 +1,5 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.sql.SQLOutput;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -37,7 +36,6 @@ public class Cache {
             String cmd = line[0];
             int size = Integer.parseInt(line[1]);
             int address = Integer.parseInt(line[2], 16);
-//            System.out.println(cmd + " " + size + " " + address);
 
             int offsetSize = findOffsetSize(lines);
             int indexSize = findIndexSize(sets);
@@ -46,11 +44,6 @@ public class Cache {
             int tag = findTag(address, tagSize, lines);
             int offset = findOffset(address, offsetSize);
             int index = findIndex(address, indexSize, offsetSize);
-
-//            System.out.println("tag is: " + tag);
-//            System.out.println("index is: " + index);
-//            System.out.println("offset is: " + offset);
-//            System.out.println();
 
             if(address % size == 0){
                 Block block = new Block(false, tag, index, offset, count);
@@ -65,13 +58,9 @@ public class Cache {
                             alreadyHit.add(block);
                             hits++;
                         }
-                        else if(sizeCheck){
-                            if(check) {
-                                output(cmd, line[2], tag, index, offset, "miss", 1);
-                            }
-                            else{
-                                output(cmd, line[2], tag, index, offset, "miss", 2);
-                            }
+                        else if(hasDirtyBit()){
+                            block.isDirty = true;
+                            output(cmd, line[2], tag, index, offset, "miss", 2);
                             miss++;
                         }
                         else{ //if not --> miss and memRef+1
@@ -91,7 +80,10 @@ public class Cache {
                             block.isDirty = true;
                             output(cmd, line[2], tag, index, offset, "miss", 2);
                             miss++;
-
+                            set.clear();
+                            set.add(block);
+                            alreadyHit.clear();
+                            alreadyHit.add(block);
                         }
                         else{ //if not --> miss and memRef+1
                             output(cmd, line[2], tag, index, offset, "miss", 1);
@@ -107,6 +99,16 @@ public class Cache {
         }
 
         printSummary();
+    }
+
+    public boolean hasDirtyBit(){
+        boolean result = false;
+        for(Block b : alreadyHit){
+            if(b.isDirty){
+                result = true;
+            }
+        }
+        return result;
     }
 
     public boolean hasBlock(Block block){
