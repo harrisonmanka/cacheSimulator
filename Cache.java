@@ -52,8 +52,16 @@ public class Cache {
                 set.add(block);
                 count++;
                 switch(cmd){
-                    case "read" -> { //if in set --> hit, if not --> miss and memRef+1
-
+                    case "read" -> {
+                        if(count != 1){
+                            boolean check = set.contains(block);
+                            if(check){ //if in set --> hit
+                                output(cmd, address, tag, index, offset, "hit", 0);
+                            }
+                            else{ //if not --> miss and memRef+1
+                                output(cmd, address, tag, index, offset, "miss", 1);
+                            }
+                        }
                     }
                     case "write" -> {
 
@@ -65,6 +73,15 @@ public class Cache {
                 System.exit(1);
             }
         }
+    }
+
+    public void output(String access, int address, int tag, int index, int offset, String result, int ref){
+        access = String.format("%6s", access);
+        String addressS = String.format("%8d", address);
+        String tagS = String.format("%7d", tag);
+        String indexS = String.format("%5d", index);
+        String offsetS = String.format("%6d", offset);
+        result = String.format("%6s", result);
     }
 
     public int findOffsetSize(int lines){
