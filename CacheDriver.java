@@ -1,5 +1,10 @@
 import java.io.FileNotFoundException;
-
+/**
+* @author Harrison Manka
+* @author Spencer Russell
+* @version 12/6/2023
+* This is the cache Driver class and is used to take in standerd input
+*/
 public class CacheDriver {
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -9,7 +14,7 @@ public class CacheDriver {
         }
         else{
             Cache cache = new Cache(args[0]);
-            //cache.read(args[0]);
+            cache.read(args[0]);
         }
     }
 }
