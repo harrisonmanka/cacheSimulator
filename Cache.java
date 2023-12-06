@@ -115,6 +115,10 @@ public class Cache {
                             miss++;
                         }
                     }
+                    default -> {
+                        System.out.println("This access type is not supported.");
+                        System.exit(1);
+                    }
                 }
             }
             else{
