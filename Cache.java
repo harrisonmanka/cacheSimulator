@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.sql.SQLOutput;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -27,12 +28,14 @@ public class Cache {
 
         sc.nextLine();
 
-        while (sc.hasNext()) {
+        printHeader();
+
+        while (sc.hasNextLine()) {
             String[] line = sc.nextLine().split(":");
             String cmd = line[0];
             int size = Integer.parseInt(line[1]);
             int address = Integer.parseInt(line[2], 16);
-            System.out.println(cmd + " " + size + " " + address);
+//            System.out.println(cmd + " " + size + " " + address);
 
             int offsetSize = findOffsetSize(lines);
             int indexSize = findIndexSize(sets);
@@ -42,26 +45,26 @@ public class Cache {
             int offset = findOffset(address, offsetSize);
             int index = findIndex(address, indexSize, offsetSize);
 
-            System.out.println("tag is: " + tag);
-            System.out.println("index is: " + index);
-            System.out.println("offset is: " + offset);
-            System.out.println();
+//            System.out.println("tag is: " + tag);
+//            System.out.println("index is: " + index);
+//            System.out.println("offset is: " + offset);
+//            System.out.println();
 
             if(address % size == 0){
                 Block block = new Block(false, tag, index, offset, count);
-                set.add(block);
                 count++;
                 switch(cmd){
                     case "read" -> {
-                        if(count != 1){
-                            boolean check = set.contains(block);
-                            if(check){ //if in set --> hit
-                                output(cmd, address, tag, index, offset, "hit", 0);
-                            }
-                            else{ //if not --> miss and memRef+1
-                                output(cmd, address, tag, index, offset, "miss", 1);
-                            }
+                        boolean check = hasBlock(block);
+                        if(check){ //if in set --> hit
+                            output(cmd, line[2], tag, index, offset, "hit", 0);
+                            hits++;
                         }
+                        else{ //if not --> miss and memRef+1
+                            output(cmd, line[2], tag, index, offset, "miss", 1);
+                            miss++;
+                        }
+                        set.add(block);
                     }
                     case "write" -> {
 
@@ -73,15 +76,48 @@ public class Cache {
                 System.exit(1);
             }
         }
+
+        printSummary();
     }
 
-    public void output(String access, int address, int tag, int index, int offset, String result, int ref){
+    public boolean hasBlock(Block block){
+        boolean result = false;
+        for(Block b : set){
+            if(b.index == block.index && b.offset == block.offset && b.tag == block.tag){
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
+    public void output(String access, String address, int tag, int index, int offset, String result, int ref){
         access = String.format("%6s", access);
-        String addressS = String.format("%8d", address);
+        address = String.format("%8s", address);
         String tagS = String.format("%7d", tag);
         String indexS = String.format("%5d", index);
         String offsetS = String.format("%6d", offset);
         result = String.format("%6s", result);
+        String refS = String.format("%7d", ref);
+        System.out.println(access + " " + address + " " + tagS + " " + indexS + " " + offsetS
+                            + " " + result + " " + refS);
+    }
+
+    public void printHeader(){
+        System.out.println("Access Address\t  Tag   Index Offset Result Memrefs");
+        System.out.println("------ -------- ------- ----- ------ ------ -------");
+    }
+
+    public void printSummary(){
+        double total = hits + miss;
+        System.out.println();
+        System.out.println("Simulation Summary Statistics");
+        System.out.println("-----------------------------"); //19
+        System.out.println("Total hits       : " + hits);
+        System.out.println("Total misses     : " + miss);
+        System.out.println("Total accesses   : " + (hits + miss));
+        System.out.println("Hit ratio        : " + (hits / total));
+        System.out.println("Miss ratio       : " + (miss / total));
     }
 
     public int findOffsetSize(int lines){
