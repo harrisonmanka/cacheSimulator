@@ -10,10 +10,12 @@ public class Cache {
     private int hits;
     private int miss;
     private Set<Block> set;
+    private Set<Block> alreadyHit;
     int count;
 
     public Cache(String file) throws FileNotFoundException {
-        this.set = new HashSet<Block>();
+        this.set = new HashSet<>();
+        this.alreadyHit = new HashSet<>();
         this.count = 0;
         read(file);
     }
@@ -56,8 +58,10 @@ public class Cache {
                 switch(cmd){
                     case "read" -> {
                         boolean check = hasBlock(block);
-                        if(check){ //if in set --> hit
+                        boolean alrHit = checkForHit(block);
+                        if(check && !alrHit){ //if in set --> hit
                             output(cmd, line[2], tag, index, offset, "hit", 0);
+                            alreadyHit.add(block);
                             hits++;
                         }
                         else{ //if not --> miss and memRef+1
@@ -83,7 +87,18 @@ public class Cache {
     public boolean hasBlock(Block block){
         boolean result = false;
         for(Block b : set){
-            if(b.index == block.index && b.offset == block.offset && b.tag == block.tag){
+            if(b.index == block.index && b.tag == block.tag){
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
+    public boolean checkForHit(Block block){
+        boolean result = false;
+        for(Block b : alreadyHit){
+            if(b.index == block.index && b.tag == block.tag && b.offset == block.offset){
                 result = true;
                 break;
             }
